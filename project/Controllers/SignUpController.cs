@@ -1,26 +1,37 @@
+using JustBuyApi.Data;
 using Microsoft.AspNetCore.Mvc;
-using project.Data;
 
-namespace JustBuyApi.Controllers
+namespace JustBuyApi.Controllers;
+
+[Route("signup")]
+[ApiController]
+public class SignUpController : ControllerBase
 {
-    [Route("signup")]
-    [ApiController]
-    public class SignUpController : ControllerBase
-    {
-        private readonly ProjectContext _context;
+    private readonly ProjectContext _context;
 
-        public SignUpController(ProjectContext context)
+    public SignUpController(ProjectContext context)
+    {
+        _context = context;
+    }
+
+    public class SignUpUser
+    {
+        public string? FullName { get; set; }
+        public string? Email { get; set; }
+        public string? Password { get; set; }
+    }
+    
+    //TODO: Add post for sign up
+    [HttpPost]
+    public async Task<IActionResult> PostSignUp([FromBody] SignUpUser signUpUser)
+    {
+        if (string.IsNullOrEmpty(signUpUser.Email) ||
+            string.IsNullOrEmpty(signUpUser.Password) ||
+            string.IsNullOrEmpty(signUpUser.FullName))
         {
-            _context = context;
+            return UnprocessableEntity();
         }
-        //TODO: Add post for sign up
-        // [HttpPost]
-        // public async Task<IActionResult> PostSignUp([FromBody] User user)
-        // {
-        //     if (user.Email == null || user.Password == null || user.FullName == null)
-        //     {
-        //         return BadRequest();
-        //     }
-        // }
+
+        return Ok();
     }
 }

@@ -2,7 +2,6 @@ using JustBuyApi.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using project.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<ProjectContext>(options =>

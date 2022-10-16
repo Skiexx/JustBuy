@@ -3,16 +3,16 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace JustBuyApi.Migrations
-{
-    public partial class Initial : Migration
-    {
-        protected override void Up(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.AlterDatabase()
-                .Annotation("MySql:CharSet", "utf8mb4");
+namespace JustBuyApi.Migrations;
 
-            migrationBuilder.CreateTable(
+public partial class Initial : Migration
+{
+    protected override void Up(MigrationBuilder migrationBuilder)
+    {
+        migrationBuilder.AlterDatabase()
+            .Annotation("MySql:CharSet", "utf8mb4");
+
+        migrationBuilder.CreateTable(
                 name: "Roles",
                 columns: table => new
                 {
@@ -25,9 +25,9 @@ namespace JustBuyApi.Migrations
                 {
                     table.PrimaryKey("PK_Roles", x => x.Id);
                 })
-                .Annotation("MySql:CharSet", "utf8mb4");
+            .Annotation("MySql:CharSet", "utf8mb4");
 
-            migrationBuilder.CreateTable(
+        migrationBuilder.CreateTable(
                 name: "Users",
                 columns: table => new
                 {
@@ -35,7 +35,7 @@ namespace JustBuyApi.Migrations
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     FullName = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    Email = table.Column<string>(type: "longtext", nullable: false)
+                    Email = table.Column<string>(type: "varchar(255)", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Password = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
@@ -51,21 +51,46 @@ namespace JustBuyApi.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 })
-                .Annotation("MySql:CharSet", "utf8mb4");
+            .Annotation("MySql:CharSet", "utf8mb4");
 
-            migrationBuilder.CreateIndex(
-                name: "IX_Users_FK_Role_Id",
-                table: "Users",
-                column: "FK_Role_Id");
-        }
+        migrationBuilder.InsertData(
+            table: "Roles",
+            columns: new[] { "Id", "Title" },
+            values: new object[] { 1, "Администратор" });
 
-        protected override void Down(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.DropTable(
-                name: "Users");
+        migrationBuilder.InsertData(
+            table: "Roles",
+            columns: new[] { "Id", "Title" },
+            values: new object[] { 2, "Клиент" });
 
-            migrationBuilder.DropTable(
-                name: "Roles");
-        }
+        migrationBuilder.InsertData(
+            table: "Users",
+            columns: new[] { "Id", "Email", "FK_Role_Id", "FullName", "Password" },
+            values: new object[] { 1, "admin@shop.ru", 1, "Администратор", "QWEasd123" });
+
+        migrationBuilder.InsertData(
+            table: "Users",
+            columns: new[] { "Id", "Email", "FK_Role_Id", "FullName", "Password" },
+            values: new object[] { 2, "user@shop.ru", 2, "Клиент", "password" });
+
+        migrationBuilder.CreateIndex(
+            name: "IX_Users_Email",
+            table: "Users",
+            column: "Email",
+            unique: true);
+
+        migrationBuilder.CreateIndex(
+            name: "IX_Users_FK_Role_Id",
+            table: "Users",
+            column: "FK_Role_Id");
+    }
+
+    protected override void Down(MigrationBuilder migrationBuilder)
+    {
+        migrationBuilder.DropTable(
+            name: "Users");
+
+        migrationBuilder.DropTable(
+            name: "Roles");
     }
 }

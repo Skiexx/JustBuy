@@ -19,8 +19,8 @@ public class User
     public string? Password { get; set; }
     
     [Required] 
-    public int FK_Role_Id { get; set; }
+    public int RoleId { get; set; }
     
-    [ForeignKey("FK_Role_Id")]
+    [ForeignKey("RoleId")]
     public Role? Role { get; set; }
 }

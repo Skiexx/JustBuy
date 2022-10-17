@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace JustBuyApi.Models;
 
+[Table("Roles")]
 public class Role
 {
     [Key,DatabaseGenerated(DatabaseGeneratedOption.Identity)]

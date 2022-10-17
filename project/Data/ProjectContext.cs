@@ -36,7 +36,7 @@ public class ProjectContext : DbContext
                     Email = "admin@shop.ru",
                     FullName = "Администратор",
                     Password = "QWEasd123",
-                    FK_Role_Id = 1
+                    RoleId = 1
                 },
                 new User
                 {
@@ -44,11 +44,14 @@ public class ProjectContext : DbContext
                     Email = "user@shop.ru",
                     FullName = "Клиент",
                     Password = "password",
-                    FK_Role_Id = 2
+                    RoleId = 2
                 });
         });
     }
 
     public DbSet<User> Users { get; set; } = default!;
     public DbSet<Role> Roles { get; set; } = default!;
+    public DbSet<Product> Products { get; set; } = default!;
+    public DbSet<Cart> Carts { get; set; } = default!;
+    public DbSet<Order> Orders { get; set; } = default!;
 }

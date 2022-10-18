@@ -6,7 +6,9 @@ using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<ProjectContext>(options =>
-    options.UseMySql(builder.Configuration.GetConnectionString("DefaultConnection"), 
+    options
+        .UseLazyLoadingProxies()
+        .UseMySql(builder.Configuration.GetConnectionString("DefaultConnection"), 
         ServerVersion.Parse("8.0.30-mysql") 
     ));
 builder.Services.AddAuthorization();
@@ -22,6 +24,24 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateLifetime = true,
             IssuerSigningKey = AuthOption.GetSymmetricSecurityKey(),
             ValidateIssuerSigningKey = true
+        };
+        options.Events = new JwtBearerEvents();
+        options.Events.OnChallenge = context =>
+        {
+            // Перехват ошибки авторизации и возврат сообщения вместо 401
+            context.HandleResponse();
+            context.Response.StatusCode = 403;
+            context.Response.ContentType = "application/json";
+            const string error = @"{ ""error"": { ""code"": 403, ""message"": ""Login failed"" } }";
+            return context.Response.WriteAsync(error);
+        };
+        options.Events.OnForbidden = context =>
+        {
+            // Перехват ошибки доступа и возврат сообщения вместо 403
+            context.Response.StatusCode = 403;
+            context.Response.ContentType = "application/json";
+            const string error = @"{ ""error"": { ""code"": 403, ""message"": ""Forbidden for you"" } }";
+            return context.Response.WriteAsync(error);
         };
     });
 

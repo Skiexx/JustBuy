@@ -17,4 +17,6 @@ public class Product
     
     [Required] 
     public int Price { get; set; }
+    
+    public virtual List<Cart>? Carts { get; set; }
 }

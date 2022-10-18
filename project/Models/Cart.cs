@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace JustBuyApi.Models;
 
+[Table("Carts")]
 public class Cart
 {
     [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -18,8 +19,8 @@ public class Cart
     public int OrderId { get; set; }
     
     [ForeignKey("ProductId")]
-    public Product? Product { get; set; }
+    public virtual Product? Product { get; set; }
     
     [ForeignKey("OrderId")]
-    public Order? Order { get; set; }
+    public virtual Order? Order { get; set; }
 }

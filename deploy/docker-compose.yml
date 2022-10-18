@@ -1,0 +1,35 @@
+version: "3.7"
+
+services: 
+  mysql:
+    image: mysql:8.0.30
+    container_name: mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: QWEasd123@
+      MYSQL_DATABASE: JustBuy
+      MYSQL_USER: JustBuy
+      MYSQL_PASSWORD: QWEasd123@
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./mysql:/var/lib/mysql
+      - ./mysql/conf.d:/etc/mysql/conf.d
+      - ./mysql/logs:/var/log/mysql
+    networks:
+      - justbuy
+
+  justBuy:
+    build:
+      context: ./project
+      dockerfile: Dockerfile
+    container_name: justBuy
+    restart: always
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./project:/app
+      - ./project/logs:/app/logs
+    networks:
+      - justbuy
+    

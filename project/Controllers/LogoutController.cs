@@ -1,22 +1,19 @@
-using JustBuyApi.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace JustBuyApi.Controllers;
 
 // Доступен только авторизованным пользователям [Authorize]
+/// <inheritdoc />
 [ApiController]
 [Route("/logout")]
 public class LogoutController : ControllerBase
 {
-    private readonly ProjectContext _context;
-
-    public LogoutController(ProjectContext context)
-    {
-        _context = context;
-    }
-    
     // API: /logout - выход из аккаунта
+    /// <summary>
+    /// Выход из аккаунта.
+    /// </summary>
+    /// <returns>Сообщение об успешном выходе</returns>
     [HttpGet]
     [Authorize]
     [Produces("application/json")]

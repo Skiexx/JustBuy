@@ -7,18 +7,26 @@ namespace JustBuyApi.Controllers;
 
 // Доступен только авторизованным пользователям [Authorize(Roles = 2)]
 // 2 - это роль клиента
+/// <inheritdoc />
 [ApiController]
 [Route("/order")]
 public class OrderController : ControllerBase
 {
     private readonly ProjectContext _context;
 
+    /// <inheritdoc />
     public OrderController(ProjectContext context)
     {
         _context = context;
     }
     
     // API: /order - оформление заказа
+    /// <summary>
+    /// Оформить заказ
+    /// </summary>
+    /// <returns>Сообщение об успешном оформлении</returns>
+    /// <response code="200">Заказ оформлен</response>
+    /// <response code="422">Корзина пуста</response>
     [HttpPost]
     [Authorize(Roles = "2")]
     [Produces("application/json")]
@@ -67,9 +75,14 @@ public class OrderController : ControllerBase
     }
     
     // API: /order - просмотр оформленных заказов
+    /// <summary>
+    /// Просмотр заказов, которые уже совершили покупателем
+    /// </summary>
+    /// <returns>Список завершенных заказов</returns>
     [HttpGet]
     [Authorize(Roles = "2")]
     [Produces("application/json")]
+    [ProducesResponseType(200)]
     public async Task<IActionResult> GetOrders()
     {
         // Получение id пользователя из токена
@@ -93,7 +106,8 @@ public class OrderController : ControllerBase
         for (int i = 0; i < orders.Count; i++)
         {
             // Поиск товаров в заказе
-            var cartItems = await _context.Carts.Where(c => c.OrderId == orders[i].Id).ToListAsync();
+            var i1 = i;
+            var cartItems = await _context.Carts.Where(c => c.OrderId == orders[i1].Id).ToListAsync();
             // Добавление блока с информацией о заказе
             ordersResponse.Add(
                 @$"{{ ""id"": {orders[i].Id}, ""products"": [{string.Join(",", cartItems.Select(c => c.ProductId))}], ""order_price"": {cartItems.Sum(c => c.Product!.Price * c.Quantity)} }}");

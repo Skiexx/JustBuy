@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics.CodeAnalysis;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using JustBuyApi.Data;
@@ -9,35 +10,49 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace JustBuyApi.Controllers;
 
+/// <inheritdoc />
 [Route("signup")]
 [ApiController]
 public class SignUpController : ControllerBase
 {
     private readonly ProjectContext _context;
 
+    /// <inheritdoc />
     public SignUpController(ProjectContext context)
     {
         _context = context;
     }
     
     // Класс пользователя с полями для регистрации
+    [SuppressMessage("ReSharper", "UnusedAutoPropertyAccessor.Global")]
+#pragma warning disable CS1591
     public class SignUpUser
     {
-        public string? fio { get; set; }
+        public string? Fio { get; set; }
         public string? Email { get; set; }
         public string? Password { get; set; }
     }
+#pragma warning restore CS1591
     
     // API: /signup - регистрация пользователя
+    /// <summary>
+    /// Регистрация пользователя
+    /// </summary>
+    /// <param name="signUpUser">Поля необходимые для регистрации</param>
+    /// <returns>JWT-токен зарегистрированного пользователя</returns>
+    /// <response code="422">Ошибка в введенных данных</response>
+    /// <response code="201">Возвращается JWT токен зарегистрированного пользователя</response>
     [HttpPost]
     [Produces("application/json")]
+    [ProducesResponseType( 201)]
+    [ProducesResponseType(typeof(ErrorsController.ErrorClass), 422)]
     public async Task<IActionResult> PostSignUp([FromBody] SignUpUser signUpUser)
     {
         // Словарь ошибок, где ключ - название поля, а значение - ошибка
         var errors = new Dictionary<string, string>();
         
         // Проверка ФИО на пустоту
-        if (string.IsNullOrWhiteSpace(signUpUser.fio))
+        if (string.IsNullOrWhiteSpace(signUpUser.Fio))
         {
             errors.Add("fio", "[ \"Fio is required\" ]");
         }
@@ -83,7 +98,7 @@ public class SignUpController : ControllerBase
         {
             Email = signUpUser.Email,
             Password = signUpUser.Password,
-            FullName = signUpUser.fio,
+            FullName = signUpUser.Fio,
             RoleId = 2
         };
         await _context.Users.AddAsync(user);
@@ -91,7 +106,6 @@ public class SignUpController : ControllerBase
 
         var claims = new List<Claim>
         {
-            new(ClaimTypes.Email, user.Email!),
             new(ClaimTypes.Role, user.RoleId.ToString()),
             new("Id", user.Id.ToString())
         };

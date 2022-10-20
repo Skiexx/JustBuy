@@ -1,35 +1,49 @@
-version: "3.7"
+version: "2"
 
-services: 
-  mysql:
-    image: mysql:8.0.30
-    container_name: mysql
+networks:
+  app-net:
+    driver: bridge
+
+volumes: 
+  db_data:
+    driver: local
+
+services:
+  postgres:
+    image: bitnami/postgresql:latest
+    container_name: postgres
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: QWEasd123@
-      MYSQL_DATABASE: JustBuy
-      MYSQL_USER: JustBuy
-      MYSQL_PASSWORD: QWEasd123@
-    ports:
-      - "3306:3306"
+      - POSTGRESQL_PASSWORD=qweASD123@
+      - POSTGRESQL_DATABASE=just_buy
     volumes:
-      - ./mysql:/var/lib/mysql
-      - ./mysql/conf.d:/etc/mysql/conf.d
-      - ./mysql/logs:/var/log/mysql
+      - db_data:/bitnami/postgresql
     networks:
-      - justbuy
+      - app-net
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 5s
+      timeout: 25s
+      retries: 10
 
-  justBuy:
+  justbuy:
     build:
-      context: ./project
+      context: ../project
       dockerfile: Dockerfile
-    container_name: justBuy
+    container_name: just_buy
     restart: always
+    environment:
+      - ASPNETCORE_URLS=http://+:80;https://+:443
+      - ASPNETCORE_HTTPS_PORT=443
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=qweASD123
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
     ports:
-      - "8080:8080"
+      - "8080:80"
+      - "4430:443"
+    depends_on:
+      postgres:
+        condition: service_healthy
     volumes:
-      - ./project:/app
-      - ./project/logs:/app/logs
-    networks:
-      - justbuy
-    
+      - ../project/Data/https:/https
+    networks: 
+      - app-net

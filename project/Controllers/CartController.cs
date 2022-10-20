@@ -8,25 +8,37 @@ namespace JustBuyApi.Controllers;
 
 // Доступен только авторизованным пользователям [Authorize(Roles = 2)]
 // 2 - это роль клиента
+/// <summary>
+/// Контроллер корзины
+/// </summary>
 [ApiController]
 [Route("/cart")]
 public class CartController : ControllerBase
 {
     private readonly ProjectContext _context;
 
+    /// <inheritdoc />
     public CartController(ProjectContext context)
     {
         _context = context;
     }
 
+    /// <summary>
+    /// Добавляет в корзину product_id
+    /// </summary>
+    /// <param name="productId">Id продукта из БД</param>
+    /// <response code="201">Успешно</response>
+    /// <response code="422">Ошибка валидации</response>
     // API: /cart/{product_id} - Добавление товара в корзину, где product_id - id товара
-    [HttpPost("{product_id:int}")]
+    [HttpPost("{productId:int}")]
     [Authorize(Roles = "2")]
     [Produces("application/json")]
-    public async Task<IActionResult> AddToCart(int product_id)
+    [ProducesResponseType(201)]
+    [ProducesResponseType(typeof(ErrorsController.ErrorClass),422)]
+    public async Task<IActionResult> AddToCart(int productId)
     {
         // Поиск товара в базе данных
-        var product = await _context.Products.FirstOrDefaultAsync(x => x.Id == product_id);
+        var product = await _context.Products.FirstOrDefaultAsync(x => x.Id == productId);
         if (product == null)
         {
             // Если товар не найден, возвращаем ошибку
@@ -57,7 +69,7 @@ public class CartController : ControllerBase
         }
         
         // Поиск товара в корзине
-        var cart = await _context.Carts.FirstOrDefaultAsync(c => c.OrderId == orderId!.Id && c.ProductId == product_id);
+        var cart = await _context.Carts.FirstOrDefaultAsync(c => c.OrderId == orderId!.Id && c.ProductId == productId);
         if (cart == null)
         {
             // Если товар не найден в корзине, добавляем его
@@ -88,9 +100,15 @@ public class CartController : ControllerBase
     }
     
     // API: /cart - Получение списка товаров в корзине
+    /// <summary>
+    /// Получает список товаров в корзине
+    /// </summary>
+    /// <returns>Список товаров в корзине</returns>
+    /// <response code="200">Успешно</response>
     [HttpGet]
     [Authorize(Roles = "2")]
     [Produces("application/json")]
+    [ProducesResponseType(200)]
     public async Task<IActionResult> GetCart()
     {
         // Получение id пользователя из токена
@@ -110,7 +128,7 @@ public class CartController : ControllerBase
         }
         
         // Получение списка товаров в корзине
-        var cart = await _context.Carts.Where(c => c.OrderId == orderId!.Id).ToListAsync();
+        var cart = await _context.Carts.Where(c => c.OrderId == orderId.Id).ToListAsync();
         if (!cart.Any())
         {
             // Если товары в корзине не найдены, возвращаем пустой список
@@ -126,13 +144,13 @@ public class CartController : ControllerBase
         
         // Формирование ответа
         var cartItemsResponse = new List<string>();
-        for (int i = 0; i < cart.Count; i++)
+        foreach (var t in cart)
         {
             // Поиск товара в БД
-            var product = products.FirstOrDefault(p => p.Id == cart[i].ProductId)!;
+            var product = products.FirstOrDefault(p => p.Id == t.ProductId)!;
             // Добавление блока с информацией о товаре в ответ
             cartItemsResponse.Add(
-                $@"{{ ""id"": {cart[i].Id}, ""quantity"": ""{cart[i].Quantity}"", ""product_id"": ""{cart[i].ProductId}"", ""name"": ""{product.Name}"", ""description"": ""{product.Description}"", ""price"": ""{product.Price}"" }}");
+                $@"{{ ""id"": {t.Id}, ""quantity"": ""{t.Quantity}"", ""product_id"": ""{t.ProductId}"", ""name"": ""{product.Name}"", ""description"": ""{product.Description}"", ""price"": ""{product.Price}"" }}");
         }
         var response = $@"{{ ""data"": [ {string.Join(", ", cartItemsResponse)} ] }}";
         
@@ -146,12 +164,20 @@ public class CartController : ControllerBase
     }
     
     // API: /cart/{id} - Удаление товара из корзины, где id - id товара в корзине
+    /// <summary>
+    /// Удаляет товар из корзины
+    /// </summary>
+    /// <param name="id">Id товара в корзине</param>
+    /// <response code="200">Успешно</response>
+    /// <response code="422">Товар не найден в корзине</response>
     [HttpDelete("{id:int}")]
     [Authorize(Roles = "2")]
     [Produces("application/json")]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(typeof(ErrorsController.ErrorClass), 422)]
     public async Task<IActionResult> DeleteFromCart(int id)
     {
-        // Полуение id пользователя из токена
+        // Получение id пользователя из токена
         int.TryParse(User.Claims.FirstOrDefault(c => c.Type == "Id")!.Value, out var userId);
         
         // Поиск открытого заказа в БД
@@ -161,7 +187,7 @@ public class CartController : ControllerBase
             // Если открытый заказ не найден, возвращаем ошибку
             return new ContentResult
             {
-                Content = @"{ ""error"": { ""code"": 422, ""message"": ""Validation error"", ""errors"": { ""id"": ""Order not found"" } } }",
+                Content = @"{ ""error"": { ""code"": 422, ""message"": ""Validation error"", ""errors"": { ""id"": ""Item in cart not found"" } } }",
                 ContentType = "application/json",
                 StatusCode = 422
             };

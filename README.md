@@ -35,15 +35,15 @@ Web Api on ASP.NET framework
 ```
 Администратор:
   Id = 1
-	Email = "admin@shop.ru"
-	FullName = "Администратор"
-	Password = "QWEasd123"
-	RoleId = 1
+  Email = "admin@shop.ru"
+  FullName = "Администратор"
+  Password = "QWEasd123"
+  RoleId = 1
 
 Клиент:
   Id = 2
-	Email = "user@shop.ru"
-	FullName = "Клиент"
-	Password = "password"
-	RoleId = 2
+  Email = "user@shop.ru"
+  FullName = "Клиент"
+  Password = "password"
+  RoleId = 2
 ```
